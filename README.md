@@ -1,75 +1,251 @@
-# :package_description
+# BookStack Sync
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-<!--delete-->
----
-This repo can be used to scaffold a Laravel package. Follow these steps to get started:
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/aichadigital/bookstack-sync/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/aichadigital/bookstack-sync/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Have fun creating your package.
-4. If you need help creating a package, consider picking up our <a href="https://laravelpackage.training">Laravel Package Training</a> video course.
----
-<!--/delete-->
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+A Laravel package for synchronizing Markdown documentation with [BookStack](https://www.bookstackapp.com/) wiki. Perfect for keeping your project documentation in sync between your codebase and BookStack.
 
-## Support us
+## Features
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/:package_name.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/:package_name)
+- **Bidirectional Sync**: Push local Markdown files to BookStack or pull BookStack content to local files
+- **Bookmark Conversion**: Automatically converts AI-generated bookmarks (Claude, Cursor, etc.) to BookStack's URL-encoded format
+- **Spanish Character Support**: Full support for UTF-8 characters (á, é, í, ó, ú, ñ, ç, ü, etc.)
+- **Artisan Commands**: Easy-to-use CLI commands for all operations
+- **Conflict Resolution**: Multiple strategies for handling sync conflicts
+- **Dry Run Mode**: Preview changes before making them
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+## Requirements
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- PHP 8.2+
+- Laravel 10, 11, or 12
+- BookStack instance with API access
 
 ## Installation
 
-You can install the package via composer:
-
 ```bash
-composer require :vendor_slug/:package_slug
+composer require aichadigital/bookstack-sync --dev
 ```
 
-You can publish and run the migrations with:
+Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
-php artisan migrate
+php artisan vendor:publish --tag="bookstack-sync-config"
 ```
 
-You can publish the config file with:
+## Configuration
 
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
+Add these variables to your `.env` file:
+
+```env
+BOOKSTACK_URL=https://your-bookstack-instance.com
+BOOKSTACK_TOKEN_ID=your-token-id
+BOOKSTACK_TOKEN_SECRET=your-token-secret
+
+# Optional defaults
+BOOKSTACK_BOOK_ID=123
+BOOKSTACK_MARKDOWN_PATH=docs
 ```
 
-This is the contents of the published config file:
+Alternative variable names are also supported for compatibility:
 
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
+```env
+WIKI_URL=https://your-bookstack-instance.com
+WIKI_TOKEN_ID=your-token-id
+WIKI_TOKEN=your-token-secret
 ```
 
 ## Usage
 
-```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+### Artisan Commands
+
+#### Check Connection Status
+
+```bash
+php artisan bookstack:status
+php artisan bookstack:status --books
+php artisan bookstack:status --shelves
 ```
+
+#### Push Local Files to BookStack
+
+```bash
+# Push docs directory to book ID 5
+php artisan bookstack:push docs --book=5
+
+# Dry run (preview without changes)
+php artisan bookstack:push docs --book=5 --dry-run
+
+# Skip confirmation
+php artisan bookstack:push docs --book=5 --force
+```
+
+#### Pull from BookStack to Local Files
+
+```bash
+# Pull book ID 5 to local directory
+php artisan bookstack:pull --book=5 --path=docs
+
+# Dry run
+php artisan bookstack:pull --book=5 --path=docs --dry-run
+```
+
+#### Export Content
+
+```bash
+# Export as Markdown
+php artisan bookstack:export page 123
+
+# Export book as PDF
+php artisan bookstack:export book 5 --format=pdf --output=manual.pdf
+
+# Available formats: markdown, html, pdf, plaintext
+```
+
+#### Search
+
+```bash
+php artisan bookstack:search "configuration"
+php artisan bookstack:search "instalación" --limit=50
+```
+
+### Programmatic Usage
+
+```php
+use AichaDigital\BookStackSync\Facades\BookStackSync;
+
+// List all books
+$books = BookStackSync::books();
+
+// Get a specific page
+$page = BookStackSync::page(123);
+
+// Create a new page with Markdown content
+$page = BookStackSync::createPage(
+    bookId: 5,
+    name: 'Configuración Inicial',
+    content: '# Introducción\n\nContenido aquí...',
+    chapterId: 10
+);
+
+// Search
+$results = BookStackSync::search('instalación');
+
+// Sync operations
+$result = BookStackSync::pushToBook('/path/to/docs', 5);
+$result = BookStackSync::pullFromBook(5, '/path/to/docs');
+```
+
+### Bookmark Conversion
+
+The package automatically handles the conversion between AI-generated bookmark formats and BookStack's URL-encoded format:
+
+```php
+use AichaDigital\BookStackSync\Facades\BookStackSync;
+
+// Encode for BookStack
+$encoded = BookStackSync::encodeBookmark('sección-principal');
+// Returns: secci%C3%B3n-principal
+
+// Decode from BookStack
+$decoded = BookStackSync::decodeBookmark('secci%C3%B3n-principal');
+// Returns: sección-principal
+```
+
+### Direct Parser Usage
+
+```php
+use AichaDigital\BookStackSync\Parsers\MarkdownParser;
+
+$parser = new MarkdownParser();
+
+// Convert content for BookStack
+$content = '# Introducción\n\nSee [sección](#sección) for details.';
+$converted = $parser->parseForBookStack($content);
+// Anchors are now URL-encoded
+
+// Extract headings
+$headings = $parser->extractHeadings($content);
+
+// Generate Table of Contents
+$toc = $parser->generateTableOfContents($content);
+```
+
+## Markdown Frontmatter
+
+You can use YAML frontmatter in your Markdown files to specify metadata:
+
+```markdown
+---
+title: Mi Página
+chapter: Introducción
+---
+
+# Content here...
+```
+
+Supported frontmatter fields:
+
+- `title` / `name`: Page title (overrides filename)
+- `chapter`: Chapter name (creates if doesn't exist)
+- `bookstack_id`: Links to existing BookStack page for updates
+
+## Sync Configuration
+
+Configure sync behavior in `config/bookstack-sync.php`:
+
+```php
+'sync' => [
+    // Direction: 'push', 'pull', or 'bidirectional'
+    'direction' => env('BOOKSTACK_SYNC_DIRECTION', 'push'),
+
+    // Conflict resolution: 'local', 'remote', 'newest', 'manual'
+    'conflict_resolution' => env('BOOKSTACK_CONFLICT_RESOLUTION', 'manual'),
+
+    // Auto-create missing structure
+    'auto_create_structure' => true,
+
+    // Dry run mode
+    'dry_run' => false,
+],
+```
+
+## Spanish Character Encoding Reference
+
+| Character | URL Encoded |
+|-----------|-------------|
+| á | %C3%A1 |
+| é | %C3%A9 |
+| í | %C3%AD |
+| ó | %C3%B3 |
+| ú | %C3%BA |
+| ñ | %C3%B1 |
+| ü | %C3%BC |
+| ç | %C3%A7 |
 
 ## Testing
 
 ```bash
 composer test
 ```
+
+To run tests against your actual BookStack instance, copy `.env.example` to `.env` and configure your credentials:
+
+```bash
+cp .env.example .env
+# Edit .env with your BookStack credentials
+composer test
+```
+
+## API Reference
+
+This package uses the [BookStack REST API](https://demo.bookstackapp.com/api/docs). Key endpoints used:
+
+- `/api/shelves` - Shelf operations
+- `/api/books` - Book operations
+- `/api/chapters` - Chapter operations
+- `/api/pages` - Page operations
+- `/api/search` - Search across content
 
 ## Changelog
 
@@ -85,7 +261,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [AichaDigital](https://github.com/aichadigital)
 - [All Contributors](../../contributors)
 
 ## License

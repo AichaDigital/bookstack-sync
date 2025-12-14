@@ -30,3 +30,10 @@ phpstan.neon
 testbench.yaml
 /docs
 /coverage
+
+# Environment
+.env
+
+# Examples docs (local testing only)
+/examples_docs/*
+!/examples_docs/.gitkeep

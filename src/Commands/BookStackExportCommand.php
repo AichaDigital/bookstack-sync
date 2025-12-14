@@ -25,7 +25,8 @@ class BookStackExportCommand extends Command
         $type = (string) $this->argument('type');
         $id = (int) $this->argument('id');
         $formatStr = (string) $this->option('format');
-        $output = $this->option('output');
+        $outputOption = $this->option('output');
+        $output = is_string($outputOption) ? $outputOption : null;
 
         // Validate type
         if (! in_array($type, ['book', 'chapter', 'page'], true)) {

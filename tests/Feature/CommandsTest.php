@@ -289,7 +289,7 @@ describe('bookstack:push command', function () {
             ->with($this->tempDir, 1)
             ->andReturn(['created' => 1, 'updated' => 0, 'deleted' => 0, 'skipped' => 0, 'errors' => []]);
 
-        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => 1, '--force' => true])
+        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => '1', '--force' => true])
             ->expectsOutputToContain('Sync completed')
             ->assertSuccessful();
     });
@@ -309,7 +309,7 @@ describe('bookstack:push command', function () {
         $this->bookstack->shouldReceive('pushToBook')
             ->andReturn(['created' => 1, 'updated' => 0, 'deleted' => 0, 'skipped' => 0, 'errors' => []]);
 
-        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => 1, '--force' => true, '--dry-run' => true])
+        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => '1', '--force' => true, '--dry-run' => true])
             ->expectsOutputToContain('DRY RUN')
             ->assertSuccessful();
     });
@@ -325,7 +325,7 @@ describe('bookstack:push command', function () {
         $this->bookstack->shouldReceive('pushToBook')
             ->andReturn(['created' => 0, 'updated' => 0, 'deleted' => 0, 'skipped' => 0, 'errors' => ['Error 1', 'Error 2']]);
 
-        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => 1, '--force' => true])
+        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => '1', '--force' => true])
             ->expectsOutputToContain('Errors')
             ->assertFailed();
     });
@@ -334,7 +334,7 @@ describe('bookstack:push command', function () {
         $this->bookstack->shouldReceive('book')
             ->andThrow(BookStackException::notFound('book', 999));
 
-        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => 999, '--force' => true])
+        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => '999', '--force' => true])
             ->expectsOutputToContain('Push failed')
             ->assertFailed();
     });
@@ -343,7 +343,7 @@ describe('bookstack:push command', function () {
         $this->bookstack->shouldReceive('book')
             ->andReturn(new BookDTO(id: 1, name: 'Test Book', slug: 'test-book'));
 
-        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => 1])
+        $this->artisan('bookstack:push', ['path' => $this->tempDir, '--book' => '1'])
             ->expectsConfirmation('Do you want to proceed?', 'no')
             ->expectsOutputToContain('cancelled')
             ->assertSuccessful();
@@ -368,7 +368,7 @@ describe('bookstack:pull command', function () {
     it('fails without path', function () {
         config()->set('bookstack-sync.markdown.source_path', null);
 
-        $this->artisan('bookstack:pull', ['--book' => 1])
+        $this->artisan('bookstack:pull', ['--book' => '1'])
             ->expectsOutputToContain('No path specified')
             ->assertFailed();
     });
@@ -386,7 +386,7 @@ describe('bookstack:pull command', function () {
             ->with(1, $this->tempDir)
             ->andReturn(['created' => 2, 'updated' => 0, 'skipped' => 0, 'errors' => []]);
 
-        $this->artisan('bookstack:pull', ['--book' => 1, '--path' => $this->tempDir, '--force' => true])
+        $this->artisan('bookstack:pull', ['--book' => '1', '--path' => $this->tempDir, '--force' => true])
             ->expectsOutputToContain('Pull completed')
             ->assertSuccessful();
     });
@@ -404,7 +404,7 @@ describe('bookstack:pull command', function () {
         $this->bookstack->shouldReceive('pullFromBook')
             ->andReturn(['created' => 1, 'updated' => 0, 'skipped' => 0, 'errors' => []]);
 
-        $this->artisan('bookstack:pull', ['--book' => 1, '--path' => $this->tempDir, '--force' => true, '--dry-run' => true])
+        $this->artisan('bookstack:pull', ['--book' => '1', '--path' => $this->tempDir, '--force' => true, '--dry-run' => true])
             ->expectsOutputToContain('DRY RUN')
             ->assertSuccessful();
     });
@@ -420,7 +420,7 @@ describe('bookstack:pull command', function () {
         $this->bookstack->shouldReceive('pullFromBook')
             ->andReturn(['created' => 0, 'updated' => 0, 'skipped' => 0, 'errors' => ['Pull error']]);
 
-        $this->artisan('bookstack:pull', ['--book' => 1, '--path' => $this->tempDir, '--force' => true])
+        $this->artisan('bookstack:pull', ['--book' => '1', '--path' => $this->tempDir, '--force' => true])
             ->expectsOutputToContain('Errors')
             ->assertFailed();
     });
@@ -429,7 +429,7 @@ describe('bookstack:pull command', function () {
         $this->bookstack->shouldReceive('book')
             ->andThrow(BookStackException::notFound('book', 999));
 
-        $this->artisan('bookstack:pull', ['--book' => 999, '--path' => $this->tempDir, '--force' => true])
+        $this->artisan('bookstack:pull', ['--book' => '999', '--path' => $this->tempDir, '--force' => true])
             ->expectsOutputToContain('Pull failed')
             ->assertFailed();
     });
@@ -438,7 +438,7 @@ describe('bookstack:pull command', function () {
         $this->bookstack->shouldReceive('book')
             ->andReturn(new BookDTO(id: 1, name: 'Test Book', slug: 'test-book'));
 
-        $this->artisan('bookstack:pull', ['--book' => 1, '--path' => $this->tempDir])
+        $this->artisan('bookstack:pull', ['--book' => '1', '--path' => $this->tempDir])
             ->expectsConfirmation('Do you want to proceed?', 'no')
             ->expectsOutputToContain('cancelled')
             ->assertSuccessful();

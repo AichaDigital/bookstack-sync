@@ -22,10 +22,10 @@ class BookStackPullCommand extends Command
     public function handle(BookStackSync $bookstack): int
     {
         $bookOption = $this->option('book');
-        $bookId = $bookOption !== null && $bookOption !== false ? (string) $bookOption : config('bookstack-sync.defaults.book_id');
+        $bookId = is_string($bookOption) ? $bookOption : config('bookstack-sync.defaults.book_id');
         $pathOption = $this->option('path');
-        $path = $pathOption !== null && $pathOption !== false && ! is_array($pathOption) ? (string) $pathOption : (string) config('bookstack-sync.markdown.source_path', '');
-        $dryRun = (bool) $this->option('dry-run');
+        $path = is_string($pathOption) ? $pathOption : (is_string(config('bookstack-sync.markdown.source_path')) ? config('bookstack-sync.markdown.source_path') : '');
+        $dryRun = $this->option('dry-run') === true;
 
         if (empty($bookId)) {
             $this->error('No book ID specified. Use --book option or set BOOKSTACK_BOOK_ID.');

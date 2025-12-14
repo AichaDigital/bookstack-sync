@@ -22,9 +22,12 @@ class BookStackExportCommand extends Command
 
     public function handle(BookStackSync $bookstack): int
     {
-        $type = (string) $this->argument('type');
-        $id = (int) $this->argument('id');
-        $formatStr = (string) $this->option('format');
+        $typeArg = $this->argument('type');
+        $type = is_string($typeArg) ? $typeArg : '';
+        $idArg = $this->argument('id');
+        $id = is_numeric($idArg) ? (int) $idArg : 0;
+        $formatOption = $this->option('format');
+        $formatStr = is_string($formatOption) ? $formatOption : 'markdown';
         $outputOption = $this->option('output');
         $output = is_string($outputOption) ? $outputOption : null;
 

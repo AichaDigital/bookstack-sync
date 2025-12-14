@@ -18,8 +18,10 @@ class BookStackSearchCommand extends Command
 
     public function handle(BookStackSync $bookstack): int
     {
-        $query = (string) $this->argument('query');
-        $limit = (int) $this->option('limit');
+        $queryArg = $this->argument('query');
+        $query = is_string($queryArg) ? $queryArg : '';
+        $limitOption = $this->option('limit');
+        $limit = is_numeric($limitOption) ? (int) $limitOption : 20;
 
         $this->info("Searching for: \"{$query}\"");
         $this->newLine();

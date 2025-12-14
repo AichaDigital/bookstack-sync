@@ -4,11 +4,11 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/AichaDigital/bookstack-sync/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/AichaDigital/bookstack-sync/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/AichaDigital/bookstack-sync/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/AichaDigital/bookstack-sync/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![PHPStan Level 5](https://img.shields.io/badge/PHPStan-level%205-brightgreen.svg?style=flat-square)](https://phpstan.org/)
+[![PHPStan Level 8](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat-square)](https://phpstan.org/)
 [![codecov](https://codecov.io/gh/AichaDigital/bookstack-sync/branch/main/graph/badge.svg)](https://codecov.io/gh/AichaDigital/bookstack-sync)
 [![PHP Version](https://img.shields.io/packagist/php-v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 [![Laravel Version](https://img.shields.io/badge/Laravel-10.x%20|%2011.x%20|%2012.x-red.svg?style=flat-square)](https://laravel.com)
-[![License](https://img.shields.io/packagist/l/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
+[![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg?style=flat-square)](LICENSE.md)
 
 A Laravel package for synchronizing Markdown documentation with [BookStack](https://www.bookstackapp.com/) wiki. Perfect for keeping your project documentation in sync between your codebase and BookStack.
 

@@ -22,13 +22,13 @@ class BookStackExportCommand extends Command
 
     public function handle(BookStackSync $bookstack): int
     {
-        $type = $this->argument('type');
+        $type = (string) $this->argument('type');
         $id = (int) $this->argument('id');
-        $formatStr = $this->option('format');
+        $formatStr = (string) $this->option('format');
         $output = $this->option('output');
 
         // Validate type
-        if (! in_array($type, ['book', 'chapter', 'page'])) {
+        if (! in_array($type, ['book', 'chapter', 'page'], true)) {
             $this->error("Invalid type '{$type}'. Must be: book, chapter, or page");
 
             return self::FAILURE;
@@ -48,8 +48,7 @@ class BookStackExportCommand extends Command
             $content = match ($type) {
                 'book' => $bookstack->exportBook($id, $format),
                 'chapter' => $bookstack->client()->exportChapter($id, $format),
-                'page' => $bookstack->exportPage($id, $format),
-                default => throw new \InvalidArgumentException("Invalid type: {$type}"),
+                default => $bookstack->exportPage($id, $format),
             };
 
             if ($output) {

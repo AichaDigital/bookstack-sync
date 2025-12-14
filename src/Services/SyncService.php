@@ -65,13 +65,12 @@ class SyncService
      */
     public function syncDirectoryToBook(string $localPath, int $bookId): array
     {
-        $result = [
-            'created' => 0,
-            'updated' => 0,
-            'deleted' => 0,
-            'skipped' => 0,
-            'errors' => [],
-        ];
+        $created = 0;
+        $updated = 0;
+        $deleted = 0;
+        $skipped = 0;
+        /** @var array<string> $errors */
+        $errors = [];
 
         if (! File::isDirectory($localPath)) {
             throw SyncException::localFileNotFound($localPath);
@@ -89,16 +88,27 @@ class SyncService
         foreach ($files as $file) {
             try {
                 $syncResult = $this->syncFile($file, $book, $existingPages);
-                $result[$syncResult]++;
+                match ($syncResult) {
+                    'created' => $created++,
+                    'updated' => $updated++,
+                    'deleted' => $deleted++,
+                    default => $skipped++,
+                };
             } catch (\Throwable $e) {
-                $result['errors'][] = "{$file}: {$e->getMessage()}";
+                $errors[] = "{$file}: {$e->getMessage()}";
                 $this->log('error', "Error syncing {$file}: {$e->getMessage()}");
             }
         }
 
-        $this->log('info', "Sync completed: created={$result['created']}, updated={$result['updated']}, skipped={$result['skipped']}");
+        $this->log('info', "Sync completed: created={$created}, updated={$updated}, skipped={$skipped}");
 
-        return $result;
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'deleted' => $deleted,
+            'skipped' => $skipped,
+            'errors' => $errors,
+        ];
     }
 
     /**
@@ -145,7 +155,7 @@ class SyncService
         }
 
         // Update the page
-        if (! $this->dryRun) {
+        if (! $this->dryRun && $existingPage->id !== null) {
             $this->client->updatePage($existingPage->id, $pageName, $content);
         }
 
@@ -167,13 +177,19 @@ class SyncService
     ): string {
         $chapterId = null;
 
+        $bookId = $book->id;
+        if ($bookId === null) {
+            throw new \RuntimeException('Book ID is required to create a page');
+        }
+
         // Check if we need to create/find a chapter
         if (isset($frontmatter['chapter']) && $this->autoCreateStructure) {
-            $chapterId = $this->findOrCreateChapter($book->id, $frontmatter['chapter']);
+            $chapterName = (string) $frontmatter['chapter'];
+            $chapterId = $this->findOrCreateChapter($bookId, $chapterName);
         }
 
         if (! $this->dryRun) {
-            $this->client->createPage($book->id, $pageName, $content, $chapterId);
+            $this->client->createPage($bookId, $pageName, $content, $chapterId);
         }
 
         $this->log('info', "Created page: {$pageName}");
@@ -214,10 +230,12 @@ class SyncService
         string $content,
         string $filePath
     ): string {
+        $pageId = $existingPage->id;
+
         switch ($this->conflictResolution) {
             case ConflictResolution::LOCAL:
-                if (! $this->dryRun) {
-                    $this->client->updatePage($existingPage->id, $pageName, $content);
+                if (! $this->dryRun && $pageId !== null) {
+                    $this->client->updatePage($pageId, $pageName, $content);
                 }
                 $this->log('info', "Conflict resolved (local wins): {$pageName}");
 
@@ -233,8 +251,8 @@ class SyncService
                 $remoteModified = strtotime($existingPage->updatedAt ?? '');
 
                 if ($localModified > $remoteModified) {
-                    if (! $this->dryRun) {
-                        $this->client->updatePage($existingPage->id, $pageName, $content);
+                    if (! $this->dryRun && $pageId !== null) {
+                        $this->client->updatePage($pageId, $pageName, $content);
                     }
                     $this->log('info', "Conflict resolved (local newer): {$pageName}");
 
@@ -248,9 +266,12 @@ class SyncService
             case ConflictResolution::MANUAL:
             default:
                 $this->log('warning', "Conflict requires manual resolution: {$pageName}");
+                if (! isset($this->syncLog['conflicts'])) {
+                    $this->syncLog['conflicts'] = [];
+                }
                 $this->syncLog['conflicts'][] = [
                     'local' => $filePath,
-                    'remote_id' => $existingPage->id,
+                    'remote_id' => $pageId,
                     'page_name' => $pageName,
                 ];
 
@@ -286,6 +307,10 @@ class SyncService
 
         foreach ($bookPages as $page) {
             try {
+                if ($page->id === null) {
+                    continue;
+                }
+
                 $filePath = $this->pageToFilePath($page, $localPath);
                 $content = $this->client->exportPage($page->id);
 
@@ -345,7 +370,7 @@ class SyncService
     private function findExistingPage(string $name, array $pages): ?PageDTO
     {
         foreach ($pages as $page) {
-            if (mb_strtolower($page->name) === mb_strtolower($name)) {
+            if (mb_strtolower($page->name ?? '') === mb_strtolower($name)) {
                 return $page;
             }
         }
@@ -356,12 +381,12 @@ class SyncService
     /**
      * Find or create a chapter.
      */
-    private function findOrCreateChapter(int $bookId, string $chapterName): int
+    private function findOrCreateChapter(int $bookId, string $chapterName): ?int
     {
         // Search for existing chapter
         $chapters = $this->client->listChapters(500);
         foreach ($chapters as $chapter) {
-            if ($chapter->bookId === $bookId && mb_strtolower($chapter->name) === mb_strtolower($chapterName)) {
+            if ($chapter->bookId === $bookId && mb_strtolower($chapter->name ?? '') === mb_strtolower($chapterName)) {
                 return $chapter->id;
             }
         }
@@ -373,7 +398,7 @@ class SyncService
             return $chapter->id;
         }
 
-        return 0;
+        return null;
     }
 
     /**
@@ -385,9 +410,11 @@ class SyncService
     {
         $files = File::allFiles($path);
 
+        $paths = array_map(fn ($file) => $file->getPathname(), $files);
+
         return array_values(array_filter(
-            array_map(fn ($file) => $file->getPathname(), $files),
-            fn (string $file) => preg_match('/\.md$/i', $file)
+            $paths,
+            fn (string $file): bool => (bool) preg_match('/\.md$/i', $file)
         ));
     }
 
@@ -426,7 +453,11 @@ class SyncService
      */
     private function log(string $level, string $message): void
     {
-        $this->syncLog[] = [
+        if (! isset($this->syncLog['entries'])) {
+            $this->syncLog['entries'] = [];
+        }
+
+        $this->syncLog['entries'][] = [
             'level' => $level,
             'message' => $message,
             'timestamp' => now()->toIso8601String(),

@@ -58,6 +58,9 @@ class BookStackClient implements BookStackClientInterface
         return ShelfDTO::fromArray($response);
     }
 
+    /**
+     * @param  array<int>  $bookIds
+     */
     public function createShelf(string $name, ?string $description = null, array $bookIds = []): ShelfDTO
     {
         $data = ['name' => $name];
@@ -73,6 +76,9 @@ class BookStackClient implements BookStackClientInterface
         return ShelfDTO::fromArray($response);
     }
 
+    /**
+     * @param  array<int>|null  $bookIds
+     */
     public function updateShelf(int $id, ?string $name = null, ?string $description = null, ?array $bookIds = null): ShelfDTO
     {
         $data = array_filter([
@@ -294,6 +300,10 @@ class BookStackClient implements BookStackClientInterface
     }
 
     // HTTP methods
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
     private function get(string $endpoint, array $query = []): array
     {
         try {
@@ -320,6 +330,10 @@ class BookStackClient implements BookStackClientInterface
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     private function post(string $endpoint, array $data = []): array
     {
         try {
@@ -333,6 +347,10 @@ class BookStackClient implements BookStackClientInterface
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     private function put(string $endpoint, array $data = []): array
     {
         try {
@@ -357,6 +375,9 @@ class BookStackClient implements BookStackClientInterface
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function parseResponse(ResponseInterface $response): array
     {
         $body = (string) $response->getBody();

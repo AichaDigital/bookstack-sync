@@ -8,6 +8,9 @@ use AichaDigital\BookStackSync\Enums\EntityType;
 
 final class SearchResultDTO extends BaseDTO
 {
+    /**
+     * @param  array<string, mixed>|null  $tags
+     */
     public function __construct(
         ?int $id = null,
         ?string $name = null,
@@ -24,6 +27,9 @@ final class SearchResultDTO extends BaseDTO
         parent::__construct($id, $name, $slug, $createdAt, $updatedAt);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function fromArray(array $data): static
     {
         $type = null;

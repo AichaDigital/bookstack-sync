@@ -86,6 +86,9 @@ class BookStackSync
         return $this->client->getShelf($id);
     }
 
+    /**
+     * @param  array<int>  $bookIds
+     */
     public function createShelf(string $name, ?string $description = null, array $bookIds = []): ShelfDTO
     {
         return $this->client->createShelf($name, $description, $bookIds);

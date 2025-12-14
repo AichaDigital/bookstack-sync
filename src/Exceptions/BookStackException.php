@@ -8,6 +8,9 @@ use Exception;
 
 final class BookStackException extends Exception
 {
+    /**
+     * @param  array<string, mixed>|null  $response
+     */
     public function __construct(
         string $message = '',
         int $code = 0,
@@ -17,7 +20,7 @@ final class BookStackException extends Exception
         parent::__construct($message, $code, $previous);
     }
 
-    public static function connectionFailed(string $url, ?\Throwable $previous = null): static
+    public static function connectionFailed(string $url, ?\Throwable $previous = null): self
     {
         return new self(
             "Failed to connect to BookStack API at: {$url}",
@@ -27,30 +30,36 @@ final class BookStackException extends Exception
         );
     }
 
-    public static function authenticationFailed(): static
+    public static function authenticationFailed(): self
     {
-        return new static('BookStack API authentication failed. Check your token credentials.', 401);
+        return new self('BookStack API authentication failed. Check your token credentials.', 401);
     }
 
-    public static function notFound(string $resource, int|string $id): static
+    public static function notFound(string $resource, int|string $id): self
     {
-        return new static("Resource not found: {$resource} with ID {$id}", 404);
+        return new self("Resource not found: {$resource} with ID {$id}", 404);
     }
 
-    public static function validationFailed(array $errors): static
+    /**
+     * @param  array<string, mixed>  $errors
+     */
+    public static function validationFailed(array $errors): self
     {
         $message = 'Validation failed: '.json_encode($errors);
 
-        return new static($message, 422, $errors);
+        return new self($message, 422, $errors);
     }
 
-    public static function rateLimited(): static
+    public static function rateLimited(): self
     {
-        return new static('API rate limit exceeded. Please wait before making more requests.', 429);
+        return new self('API rate limit exceeded. Please wait before making more requests.', 429);
     }
 
-    public static function serverError(?array $response = null): static
+    /**
+     * @param  array<string, mixed>|null  $response
+     */
+    public static function serverError(?array $response = null): self
     {
-        return new static('BookStack server error occurred.', 500, $response);
+        return new self('BookStack server error occurred.', 500, $response);
     }
 }

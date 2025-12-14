@@ -31,6 +31,9 @@ final class PageDTO extends BaseDTO
         parent::__construct($id, $name, $slug, $createdAt, $updatedAt);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function fromArray(array $data): static
     {
         return new self(

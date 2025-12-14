@@ -21,8 +21,14 @@ interface BookStackClientInterface
 
     public function getShelf(int $id): ShelfDTO;
 
+    /**
+     * @param  array<int>  $bookIds
+     */
     public function createShelf(string $name, ?string $description = null, array $bookIds = []): ShelfDTO;
 
+    /**
+     * @param  array<int>|null  $bookIds
+     */
     public function updateShelf(int $id, ?string $name = null, ?string $description = null, ?array $bookIds = null): ShelfDTO;
 
     public function deleteShelf(int $id): bool;

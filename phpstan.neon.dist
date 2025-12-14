@@ -9,6 +9,7 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    treatPhpDocTypesAsCertain: false
     ignoreErrors:
         # Config files use env() legitimately
         - '#Called .env. outside of the config directory#'

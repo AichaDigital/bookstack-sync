@@ -21,9 +21,11 @@ class BookStackPushCommand extends Command
 
     public function handle(BookStackSync $bookstack): int
     {
-        $path = $this->argument('path') ?? config('bookstack-sync.markdown.source_path');
-        $bookId = $this->option('book') ?? config('bookstack-sync.defaults.book_id');
-        $dryRun = $this->option('dry-run');
+        $pathArg = $this->argument('path');
+        $path = $pathArg !== null && $pathArg !== false && ! is_array($pathArg) ? (string) $pathArg : (string) config('bookstack-sync.markdown.source_path', '');
+        $bookOption = $this->option('book');
+        $bookId = $bookOption !== null && $bookOption !== false ? (string) $bookOption : config('bookstack-sync.defaults.book_id');
+        $dryRun = (bool) $this->option('dry-run');
 
         if (empty($path)) {
             $this->error('No path specified. Provide a path argument or set BOOKSTACK_MARKDOWN_PATH.');

@@ -1,8 +1,14 @@
 # BookStack Sync
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/aichadigital/bookstack-sync/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/aichadigital/bookstack-sync/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/AichaDigital/bookstack-sync/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/AichaDigital/bookstack-sync/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/AichaDigital/bookstack-sync/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/AichaDigital/bookstack-sync/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![PHPStan Level 5](https://img.shields.io/badge/PHPStan-level%205-brightgreen.svg?style=flat-square)](https://phpstan.org/)
+[![codecov](https://codecov.io/gh/AichaDigital/bookstack-sync/branch/main/graph/badge.svg)](https://codecov.io/gh/AichaDigital/bookstack-sync)
+[![PHP Version](https://img.shields.io/packagist/php-v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
+[![Laravel Version](https://img.shields.io/badge/Laravel-10.x%20|%2011.x%20|%2012.x-red.svg?style=flat-square)](https://laravel.com)
+[![License](https://img.shields.io/packagist/l/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 
 A Laravel package for synchronizing Markdown documentation with [BookStack](https://www.bookstackapp.com/) wiki. Perfect for keeping your project documentation in sync between your codebase and BookStack.
 
@@ -264,6 +270,13 @@ Please review [our security policy](../../security/policy) on how to report secu
 - [AichaDigital](https://github.com/aichadigital)
 - [All Contributors](../../contributors)
 
+Special thanks to:
+
+- [BookStack](https://www.bookstackapp.com/) - The excellent open-source wiki platform that this package integrates with
+- [Dan Brown](https://github.com/ssddanbrown) - Creator and maintainer of BookStack
+
+> **Trademark Notice**: BookStack® is a registered trademark of Daniel Brown. This package is not affiliated with, endorsed by, or sponsored by BookStack or Daniel Brown.
+
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+This package is licensed under the **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**. Please see [License File](LICENSE.md) for more information.

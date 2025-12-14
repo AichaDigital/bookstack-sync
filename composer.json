@@ -11,7 +11,7 @@
         "documentation"
     ],
     "homepage": "https://github.com/aichadigital/bookstack-sync",
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "authors": [
         {
             "name": "AichaDigital",

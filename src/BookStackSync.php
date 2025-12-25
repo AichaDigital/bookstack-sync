@@ -6,6 +6,7 @@ namespace AichaDigital\BookStackSync;
 
 use AichaDigital\BookStackSync\Api\BookStackClient;
 use AichaDigital\BookStackSync\Contracts\BookStackClientInterface;
+use AichaDigital\BookStackSync\Database\Database;
 use AichaDigital\BookStackSync\DTOs\BookDTO;
 use AichaDigital\BookStackSync\DTOs\ChapterDTO;
 use AichaDigital\BookStackSync\DTOs\PageDTO;
@@ -33,9 +34,12 @@ class BookStackSync
 
     private ?SyncService $syncService = null;
 
-    public function __construct(?BookStackClientInterface $client = null)
+    private ?Database $database = null;
+
+    public function __construct(?BookStackClientInterface $client = null, ?Database $database = null)
     {
         $this->client = $client ?? $this->createDefaultClient();
+        $this->database = $database;
         $this->parser = new MarkdownParser(
             config('bookstack-sync.markdown.convert_bookmarks', true),
             config('bookstack-sync.markdown.encoding', 'UTF-8')
@@ -43,6 +47,29 @@ class BookStackSync
         $this->bookmarkConverter = new BookmarkConverter(
             config('bookstack-sync.markdown.encoding', 'UTF-8')
         );
+    }
+
+    /**
+     * Get the database instance.
+     */
+    public function database(): ?Database
+    {
+        return $this->database;
+    }
+
+    /**
+     * Set the database instance.
+     */
+    public function setDatabase(?Database $database): self
+    {
+        $this->database = $database;
+
+        // Update sync service if already created
+        if ($this->syncService !== null) {
+            $this->syncService->setDatabase($database);
+        }
+
+        return $this;
     }
 
     /**
@@ -239,6 +266,11 @@ class BookStackSync
 
             if (config('bookstack-sync.sync.dry_run', false)) {
                 $this->syncService->setDryRun(true);
+            }
+
+            // Inject database if available
+            if ($this->database !== null) {
+                $this->syncService->setDatabase($this->database);
             }
         }
 

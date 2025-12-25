@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AichaDigital\BookStackSync\Services;
 
 use AichaDigital\BookStackSync\Contracts\BookStackClientInterface;
+use AichaDigital\BookStackSync\Database\Database;
 use AichaDigital\BookStackSync\DTOs\BookDTO;
 use AichaDigital\BookStackSync\DTOs\PageDTO;
 use AichaDigital\BookStackSync\Enums\ConflictResolution;
@@ -21,6 +22,8 @@ class SyncService
     /** @var array<string, mixed> */
     private array $syncLog = [];
 
+    private ?Database $database = null;
+
     public function __construct(
         private readonly BookStackClientInterface $client,
         private readonly MarkdownParser $parser,
@@ -29,6 +32,24 @@ class SyncService
         private readonly bool $autoCreateStructure = true,
         private readonly bool $logging = true,
     ) {}
+
+    /**
+     * Set the database instance for local caching.
+     */
+    public function setDatabase(?Database $database): self
+    {
+        $this->database = $database;
+
+        return $this;
+    }
+
+    /**
+     * Get the database instance.
+     */
+    public function getDatabase(): ?Database
+    {
+        return $this->database;
+    }
 
     /**
      * Get the configured sync direction.
@@ -129,15 +150,81 @@ class SyncService
         // Parse content for BookStack
         $markdownContent = $this->parser->parseForBookStack($parsed['content']);
 
-        // Check if page exists
-        $existingPage = $this->findExistingPage($pageName, $existingPages);
+        // Calculate content hash for change detection
+        $contentHash = Database::generateContentHash($markdownContent);
+
+        // Try to find existing page by bookstack_id from frontmatter first
+        $existingPage = null;
+        if (isset($parsed['frontmatter']['bookstack_id'])) {
+            $bookstackId = (int) $parsed['frontmatter']['bookstack_id'];
+            foreach ($existingPages as $page) {
+                if ($page->id === $bookstackId) {
+                    $existingPage = $page;
+                    break;
+                }
+            }
+        }
+
+        // If not found by ID, try by local_path in database cache
+        if ($existingPage === null && $this->database !== null) {
+            $cachedPage = $this->database->getPageByLocalPath($filePath);
+            if ($cachedPage !== null) {
+                // Check if content actually changed
+                if ($cachedPage['content_hash'] === $contentHash) {
+                    $this->log('info', "Skipping unchanged file: {$pageName}");
+
+                    return 'skipped';
+                }
+
+                // Find the page in existingPages by bookstack_id
+                $bookstackId = (int) $cachedPage['bookstack_id'];
+                foreach ($existingPages as $page) {
+                    if ($page->id === $bookstackId) {
+                        $existingPage = $page;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Finally, try to find by name
+        if ($existingPage === null) {
+            $existingPage = $this->findExistingPage($pageName, $existingPages);
+        }
 
         if ($existingPage !== null) {
-            return $this->handleExistingPage($existingPage, $pageName, $markdownContent, $filePath);
+            $result = $this->handleExistingPage($existingPage, $pageName, $markdownContent, $filePath);
+
+            // Update local cache after successful sync
+            if ($result === 'updated' && ! $this->dryRun && $existingPage->id !== null) {
+                $this->updateLocalCache($existingPage->id, $filePath, $contentHash);
+            }
+
+            return $result;
         }
 
         // Create new page
-        return $this->createNewPage($book, $pageName, $markdownContent, $parsed['frontmatter']);
+        $result = $this->createNewPage($book, $pageName, $markdownContent, $parsed['frontmatter'], $filePath, $contentHash);
+
+        return $result;
+    }
+
+    /**
+     * Update local database cache after sync.
+     */
+    private function updateLocalCache(int $bookstackId, string $localPath, string $contentHash): void
+    {
+        if ($this->database === null) {
+            return;
+        }
+
+        try {
+            $this->database->connect();
+            $this->database->updatePageLocalPath($bookstackId, $localPath);
+            $this->database->updatePageContentHash($bookstackId, $contentHash);
+        } catch (\Throwable $e) {
+            $this->log('warning', "Failed to update local cache: {$e->getMessage()}");
+        }
     }
 
     /**
@@ -173,7 +260,9 @@ class SyncService
         BookDTO $book,
         string $pageName,
         string $content,
-        array $frontmatter
+        array $frontmatter,
+        ?string $filePath = null,
+        ?string $contentHash = null
     ): string {
         $chapterId = null;
 
@@ -189,7 +278,12 @@ class SyncService
         }
 
         if (! $this->dryRun) {
-            $this->client->createPage($bookId, $pageName, $content, $chapterId);
+            $newPage = $this->client->createPage($bookId, $pageName, $content, $chapterId);
+
+            // Update local cache with new page
+            if ($newPage->id !== null && $filePath !== null) {
+                $this->updateLocalCache($newPage->id, $filePath, $contentHash ?? '');
+            }
         }
 
         $this->log('info', "Created page: {$pageName}");
@@ -317,6 +411,20 @@ class SyncService
                 // Convert from BookStack format
                 $content = $this->parser->parseFromBookStack($content);
 
+                // Calculate content hash before adding frontmatter
+                $contentHash = Database::generateContentHash($content);
+
+                // Check if content actually changed (using cached hash)
+                if ($this->database !== null) {
+                    $cachedPage = $this->database->getPageByBookstackId($page->id);
+                    if ($cachedPage !== null && $cachedPage['content_hash'] === $contentHash) {
+                        $this->log('info', "Skipping unchanged page: {$page->name}");
+                        $result['skipped']++;
+
+                        continue;
+                    }
+                }
+
                 // Add frontmatter
                 $frontmatter = [
                     'title' => $page->name,
@@ -328,6 +436,8 @@ class SyncService
 
                 $content = $this->parser->addFrontmatter($content, $frontmatter);
 
+                $fileExists = File::exists($filePath);
+
                 if (! $this->dryRun) {
                     // Ensure directory exists
                     $dir = dirname($filePath);
@@ -336,9 +446,12 @@ class SyncService
                     }
 
                     File::put($filePath, $content);
+
+                    // Update local cache
+                    $this->updateLocalCache($page->id, $filePath, $contentHash);
                 }
 
-                $action = File::exists($filePath) ? 'updated' : 'created';
+                $action = $fileExists ? 'updated' : 'created';
                 $result[$action]++;
                 $this->log('info', "{$action} local file: {$filePath}");
             } catch (\Throwable $e) {

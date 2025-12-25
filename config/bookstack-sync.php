@@ -103,4 +103,28 @@ return [
         'enabled' => env('BOOKSTACK_LOGGING', true),
         'channel' => env('BOOKSTACK_LOG_CHANNEL', 'stack'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Local Database Configuration
+    |--------------------------------------------------------------------------
+    |
+    | SQLite database for caching wiki structure locally.
+    | This reduces API calls and enables offline querying of wiki structure.
+    |
+    | Features:
+    | - Cache shelves, books, chapters, pages structure
+    | - Track synchronization state (synced_at, is_deleted)
+    | - Map local files to remote pages (local_path)
+    | - Detect content changes efficiently (content_hash)
+    |
+    */
+
+    'database' => [
+        // Enable local SQLite cache
+        'enabled' => env('BOOKSTACK_LOCAL_DB', true),
+
+        // Path to SQLite database file (relative to storage_path or absolute)
+        'path' => env('BOOKSTACK_DB_PATH', 'bookstack-sync.sqlite'),
+    ],
 ];

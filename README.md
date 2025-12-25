@@ -15,6 +15,7 @@ A Laravel package for synchronizing Markdown documentation with [BookStack](http
 ## Features
 
 - **Bidirectional Sync**: Push local Markdown files to BookStack or pull BookStack content to local files
+- **Local SQLite Cache**: Reduces API calls by caching wiki structure locally with change detection
 - **Bookmark Conversion**: Automatically converts AI-generated bookmarks (Claude, Cursor, etc.) to BookStack's URL-encoded format
 - **Spanish Character Support**: Full support for UTF-8 characters (á, é, í, ó, ú, ñ, ç, ü, etc.)
 - **Artisan Commands**: Easy-to-use CLI commands for all operations
@@ -113,6 +114,41 @@ php artisan bookstack:export book 5 --format=pdf --output=manual.pdf
 ```bash
 php artisan bookstack:search "configuration"
 php artisan bookstack:search "instalación" --limit=50
+```
+
+#### Sync Wiki Structure to Local Cache
+
+```bash
+# Sync all wiki structure to local SQLite database
+php artisan bookstack:sync
+
+# Fresh sync (deletes existing database first)
+php artisan bookstack:sync --fresh
+
+# Sync only specific entities
+php artisan bookstack:sync --no-shelves --no-chapters
+```
+
+#### Query Local Cache
+
+```bash
+# Show database statistics
+php artisan bookstack:db stats
+
+# List cached entities
+php artisan bookstack:db shelves
+php artisan bookstack:db books
+php artisan bookstack:db chapters --book=5
+php artisan bookstack:db pages --book=5 --chapter=10
+
+# Include deleted items
+php artisan bookstack:db pages --deleted
+
+# Show database path and size
+php artisan bookstack:db path
+
+# Delete local database
+php artisan bookstack:db delete --force
 ```
 
 ### Programmatic Usage
@@ -215,6 +251,37 @@ Configure sync behavior in `config/bookstack-sync.php`:
     'dry_run' => false,
 ],
 ```
+
+## Local Database Configuration
+
+The package includes a local SQLite cache to reduce API calls and enable change detection:
+
+```php
+'database' => [
+    // Enable/disable local database caching
+    'enabled' => env('BOOKSTACK_LOCAL_DB', true),
+
+    // Database path (relative to storage/ or absolute path)
+    'path' => env('BOOKSTACK_DB_PATH', 'bookstack-sync.sqlite'),
+],
+```
+
+### Environment Variables
+
+```env
+# Enable local SQLite cache (default: true)
+BOOKSTACK_LOCAL_DB=true
+
+# Custom database path (default: storage/bookstack-sync.sqlite)
+BOOKSTACK_DB_PATH=bookstack-sync.sqlite
+```
+
+### How It Works
+
+1. Run `php artisan bookstack:sync` to populate the local cache
+2. The cache stores all shelves, books, chapters, and pages with their metadata
+3. During push/pull operations, the package uses content hashes to skip unchanged files
+4. Deleted items in BookStack are marked with `is_deleted` flag for tracking
 
 ## Spanish Character Encoding Reference
 

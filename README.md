@@ -45,7 +45,7 @@ php artisan vendor:publish --tag="bookstack-sync-config"
 Add these variables to your `.env` file:
 
 ```env
-BOOKSTACK_URL=https://your-bookstack-instance.com
+BOOKSTACK_URL=https://your-bookstack-instance.com/
 BOOKSTACK_TOKEN_ID=your-token-id
 BOOKSTACK_TOKEN_SECRET=your-token-secret
 
@@ -57,7 +57,7 @@ BOOKSTACK_MARKDOWN_PATH=docs
 Alternative variable names are also supported for compatibility:
 
 ```env
-WIKI_URL=https://your-bookstack-instance.com
+WIKI_URL=https://your-bookstack-instance.com/
 WIKI_TOKEN_ID=your-token-id
 WIKI_TOKEN=your-token-secret
 ```

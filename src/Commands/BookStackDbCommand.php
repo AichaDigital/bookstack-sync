@@ -293,7 +293,9 @@ class BookStackDbCommand extends Command
 
         if ($database->exists()) {
             $size = filesize($database->getPath());
-            $this->line('  Size: <comment>'.number_format($size).' bytes ('.number_format($size / 1024, 1).' KB)</comment>');
+            if ($size !== false) {
+                $this->line('  Size: <comment>'.number_format($size).' bytes ('.number_format($size / 1024, 1).' KB)</comment>');
+            }
         }
 
         return self::SUCCESS;

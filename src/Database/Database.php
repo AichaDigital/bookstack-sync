@@ -194,6 +194,10 @@ class Database
             $this->connect();
         }
 
+        if ($this->pdo === null) {
+            throw new \RuntimeException('Database connection failed');
+        }
+
         return $this->pdo;
     }
 
@@ -273,7 +277,9 @@ class Database
         }
         $sql .= ' ORDER BY name';
 
-        return $this->getPdo()->query($sql)->fetchAll();
+        $stmt = $this->getPdo()->query($sql);
+
+        return $stmt !== false ? $stmt->fetchAll() : [];
     }
 
     // =========================================================================
@@ -356,7 +362,9 @@ class Database
         }
         $sql .= ' ORDER BY name';
 
-        return $this->getPdo()->query($sql)->fetchAll();
+        $stmt = $this->getPdo()->query($sql);
+
+        return $stmt !== false ? $stmt->fetchAll() : [];
     }
 
     // =========================================================================
@@ -806,7 +814,7 @@ class Database
                     SUM(CASE WHEN is_deleted = 1 THEN 1 ELSE 0 END) as deleted
                 FROM {$table}
                 SQL);
-            $result = $stmt->fetch();
+            $result = $stmt !== false ? $stmt->fetch() : false;
             $stats[$table] = [
                 'total' => (int) ($result['total'] ?? 0),
                 'active' => (int) ($result['active'] ?? 0),

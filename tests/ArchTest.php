@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Illuminate\Console\Command;
 
 arch('it will not use debugging functions')
     ->expect(['dd', 'dump', 'ray', 'var_dump', 'print_r'])
@@ -20,4 +21,4 @@ arch('exceptions extend base exception')
 
 arch('commands extend Illuminate Command')
     ->expect('AichaDigital\BookStackSync\Commands')
-    ->toExtend(Illuminate\Console\Command::class);
+    ->toExtend(Command::class);

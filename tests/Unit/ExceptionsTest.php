@@ -59,7 +59,7 @@ describe('BookStackException', function () {
     });
 
     it('creates connection failed exception', function () {
-        $previous = new \Exception('Connection timed out');
+        $previous = new Exception('Connection timed out');
         $exception = BookStackException::connectionFailed('https://example.com', $previous);
 
         expect($exception)->toBeInstanceOf(BookStackException::class)
@@ -123,7 +123,7 @@ describe('SyncException', function () {
     });
 
     it('creates exception with previous', function () {
-        $previous = new \Exception('Original error');
+        $previous = new Exception('Original error');
         $exception = new SyncException('Test message', 0, '/path', 123, $previous);
 
         expect($exception->getPrevious())->toBe($previous)

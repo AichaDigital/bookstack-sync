@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AichaDigital\BookStackSync\Parsers\BookmarkConverter;
 use AichaDigital\BookStackSync\Parsers\MarkdownParser;
 
 beforeEach(function () {
@@ -170,7 +171,7 @@ describe('MarkdownParser', function () {
         it('provides access to underlying BookmarkConverter', function () {
             $converter = $this->parser->getConverter();
 
-            expect($converter)->toBeInstanceOf(\AichaDigital\BookStackSync\Parsers\BookmarkConverter::class);
+            expect($converter)->toBeInstanceOf(BookmarkConverter::class);
         });
     });
 });

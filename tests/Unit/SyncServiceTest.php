@@ -160,7 +160,7 @@ describe('SyncService', function () {
 
             $this->client->shouldReceive('createPage')
                 ->once()
-                ->andThrow(new \Exception('API Error'));
+                ->andThrow(new Exception('API Error'));
 
             $service = new SyncService($this->client, $this->parser, SyncDirection::PUSH, ConflictResolution::LOCAL, true, false);
             $result = $service->syncDirectoryToBook($this->tempDir, 1);
@@ -410,7 +410,7 @@ describe('SyncService', function () {
 
             $this->client->shouldReceive('exportPage')
                 ->once()
-                ->andThrow(new \Exception('Export error'));
+                ->andThrow(new Exception('Export error'));
 
             $service = new SyncService($this->client, $this->parser, SyncDirection::PULL, ConflictResolution::LOCAL, true, false);
             $result = $service->pullBookToDirectory(1, $this->tempDir);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AichaDigital\BookStackSync\Tests;
 
 use AichaDigital\BookStackSync\BookStackSyncServiceProvider;
+use Dotenv\Dotenv;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -32,7 +33,7 @@ class TestCase extends Orchestra
 
         // Load test environment from .env if present
         if (file_exists(__DIR__.'/../.env')) {
-            $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__.'/..');
+            $dotenv = Dotenv::createImmutable(__DIR__.'/..');
             $dotenv->safeLoad();
         }
 

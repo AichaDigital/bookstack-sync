@@ -7,7 +7,7 @@
 [![PHPStan Level 8](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat-square)](https://phpstan.org/)
 [![codecov](https://codecov.io/gh/AichaDigital/bookstack-sync/branch/main/graph/badge.svg)](https://codecov.io/gh/AichaDigital/bookstack-sync)
 [![PHP Version](https://img.shields.io/packagist/php-v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
-[![Laravel Version](https://img.shields.io/badge/Laravel-10.x%20|%2011.x%20|%2012.x-red.svg?style=flat-square)](https://laravel.com)
+[![Laravel Version](https://img.shields.io/badge/Laravel-12.x%20|%2013.x-red.svg?style=flat-square)](https://laravel.com)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg?style=flat-square)](LICENSE.md)
 
 A Laravel package for synchronizing Markdown documentation with [BookStack](https://www.bookstackapp.com/) wiki. Perfect for keeping your project documentation in sync between your codebase and BookStack.
@@ -22,10 +22,17 @@ A Laravel package for synchronizing Markdown documentation with [BookStack](http
 - **Conflict Resolution**: Multiple strategies for handling sync conflicts
 - **Dry Run Mode**: Preview changes before making them
 
+## Version Compatibility
+
+| Version | PHP | Laravel | Branch |
+|---------|-----|---------|--------|
+| 2.x | ^8.4 | 12, 13 | main |
+| 1.x | ^8.2 | 10, 11, 12 | laravel-12 |
+
 ## Requirements
 
-- PHP 8.2+
-- Laravel 10, 11, or 12
+- PHP 8.4+
+- Laravel 12 or 13
 - BookStack instance with API access
 
 ## Installation

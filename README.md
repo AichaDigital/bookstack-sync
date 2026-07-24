@@ -1,5 +1,9 @@
 # BookStack Sync
 
+> **Mirror.** Development happens on GitLab: <https://gitlab.castris.com/aichadigital/bookstack-sync>.
+> This GitHub repository is an automatic, read-only replica kept for Packagist distribution.
+> Please open issues and merge requests on GitLab.
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 [![Total Downloads](https://img.shields.io/packagist/dt/aichadigital/bookstack-sync.svg?style=flat-square)](https://packagist.org/packages/aichadigital/bookstack-sync)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/AichaDigital/bookstack-sync/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/AichaDigital/bookstack-sync/actions?query=workflow%3Arun-tests+branch%3Amain)
